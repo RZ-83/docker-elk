@@ -4,10 +4,10 @@
 #
 server.name: kibana
 server.host: 0.0.0.0
-elasticsearch.hosts: [ "http://elasticsearch:9201" ]
+elasticsearch.hosts: [ "http://elasticsearch:9200" ]
 monitoring.ui.container.elasticsearch.enabled: true
 
 ## X-Pack security credentials
 #
-elasticsearch.username: zaks
-elasticsearch.password: zaks23
+elasticsearch.username: elastic
+elasticsearch.password: changeme
