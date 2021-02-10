@@ -1,0 +1,42 @@
+input {
+  udp {
+    port => 5004
+    codec => plain {
+      charset => "UTF-8"
+    }
+    type => "log4net"
+  }
+}
+
+filter {
+  mutate {
+    add_field => [ "hostip", "%{host}" ]
+  }
+  dns {
+    reverse => [ "host" ]
+    action => replace
+  }
+  if [type] == "log4net" {
+    grok {
+      break_on_match => true
+      remove_field => message
+      match => [ "message", "(?m)%{LOGLEVEL:zlevel} %{TIMESTAMP_ISO8601:sourceTimestamp} %{DATA:zlogger} \[%{NUMBER:zthreadId}\]  \[%{IPORHOST:tempHost}\] %{GREEDYDATA:tempMessage}" ]
+    }
+    if !("_grokparsefailure" in [tags]) {
+      mutate {
+        replace => [ "message" , "%{tempMessage}" ]
+        replace => [ "host" , "%{tempHost}" ]
+      }
+    }
+    mutate {
+      remove_field => [ "tempMessage" ]
+      remove_field => [ "tempHost" ]
+    }
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => "elasticsearch:9200"
+  }
+}
